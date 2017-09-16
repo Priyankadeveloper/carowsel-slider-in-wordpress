@@ -1,0 +1,325 @@
+<?php
+/**
+ * The Template for displaying all single rooms
+ *
+ * This template can be overridden by copying it to yourtheme/hotelier/single-room/single-room.php.
+ *
+ * @author  Benito Lopez <hello@lopezb.com>
+ * @package Hotelier/Templates
+ * @version 1.0.0
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+get_header();
+get_template_part( 'inc/pagetitle/pagetitle-single' ); 
+global $room;
+?>
+
+	<div id="primary" class="content-area">
+		<main id="main" class="site-main content content-width room">
+			<?php if (have_posts()) : while (have_posts()) : the_post(); ?>
+				<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+					<div class="room-content no-padding container-fluid">
+						<!-- Content + booking -->
+						<div class="row row-eq-height">
+							<div class="col-sm-12 col-lg-12 col-md-12 col-xs-12 container-left featuedimage">
+								 <?php the_content(); ?>
+            <?php if ( has_post_thumbnail() ) {
+              //the_post_thumbnail();
+			//echo do_shortcode('[print_thumbnail_slider]');
+			global $room;?>
+            <div style="float:left;width:100%;">
+            <div class="owl-carousel">
+              <?php		
+				$image_id = the_post_thumbnail('full'); 
+  				$image_url = wp_get_attachment_image_src($image_id,'medium');  
+				$image_url = $image_url[0];?>
+              <?php
+				$attachment_ids = $room->get_gallery_attachment_ids();
+				foreach ( $attachment_ids as $attachment_id ) 
+				{
+					 $attachment  = wp_get_attachment_image_src( $attachment_id, 'full' );
+					$attachment_link    = $attachment[ 0 ];	
+					 $result .= ' <div class="item"><img src="'.$attachment_link.'"  /></div>';	
+				}
+				echo $result;
+				
+				?>
+			 </div>	
+            </div>
+            <?php }?>
+							<!--addnew-->
+							
+								
+							
+							<!--addnew--> 
+							<!--<div class="col-sm-12 col-lg-6 col-md-12 col-xs-12 container-right accent-background">
+								<div class="booking-column">
+									<?php //echo do_shortcode('[cl_booking_calendar]'); ?>
+									<div class="btn-primary-container calendar" style="position:relative;">
+						<input type="submit" name="Check Availability" id="datepicker-button" class="btn-primary <?php echo esc_attr($button_style); ?>" value="Check Availability">
+					</div>
+									 
+								</div>-->
+							</div>
+						</div>
+						<!-- Amenities -->
+						<!-- Gallery -->
+						
+						<?php //if ( $gallery_images ) :
+							//$i = 0; ?><div class="roomsection">
+						<div class="row row-eq-height">
+								<div class="col-lg-8 col-md-12 col-sm-12 col-xs-12 vertical-align"> 
+ <div class="thumbnailtitle"><h3 class="gdlr-room-title"><?php the_title();?></h3></div> 
+									
+								</div>
+								<div class="col-lg-4 col-md-12 col-sm-12 col-xs-12 content_row">
+									<div class="wpb_wrapper">
+<div class="btn-primary-container calendar checkavail" style="position:relative;">
+						<a href="#"><input type="submit" name="Check Availability" id="datepicker-button" class="btn-primary <?php echo esc_attr($button_style); ?>" value="Check Availability"></a>
+					</div>									</div>
+
+								</div>
+							</div>
+							
+							<!--Priyanka--->
+						<div class="row row-eq-height">
+
+								<div class="col-lg-8 col-md-12 col-sm-12 col-xs-12 vertical-align"> 
+<div class="thumbnailtitle click"><a href="#" target="SHpopup">CLICK HERE FOR A VIRTUAL TOUR</a></div></div>
+
+</div>
+						<div class="row row-eq-height line">
+						<div class="line"></div>
+</div>
+<!--newcolum-->
+	<div class="row row-eq-height">
+
+								<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 vertical-align"> 
+<div class="thumbnailtitle col-sm-12"><?php
+ 
+// vars	
+$field = get_field_object('services');
+//$field = get_field_object('laundry_service');
+
+$colors = $field['value'];
+
+
+// check
+if( $colors ): ?>
+<div class="singleroomservices">
+<ul>
+	<?php foreach( $colors as $color ): ?>
+		<li><div class="singleroomservices-inner"><span class="check"><i class="fa fa-check-square-o new" aria-hidden="true"></i></span>
+		<?php echo $field['choices'][ $color ]; ?></div></li>
+	<?php endforeach; 
+	
+	?>
+	
+</ul>
+<?php endif; ?>
+</div></div></div>
+</div>
+</div>
+<!--newcolum-->
+
+
+<!--Priyanka--->
+						<?php //endif; ?>
+					
+						<!-- Gallery -->
+						<?php 
+						
+						$gallery_images = array();
+						
+						$attachment_ids = $room->get_gallery_attachment_ids();
+
+						foreach ( $attachment_ids as $attachment_id ) {
+							$attachment  = wp_get_attachment_image_src( $attachment_id, 'full' );
+						
+							if ( ! $attachment ) {
+								continue;
+							}
+						
+							$attachment_link    = $attachment[ 0 ];
+							$attachment_width   = $attachment[ 1 ];
+							$attachment_height  = $attachment[ 2 ];
+							$attachment_title   = get_post_field( 'post_title', $attachment_id );
+							$attachment_caption = get_post_field( 'post_excerpt', $attachment_id );
+						
+							$gallery_images[] = array(
+								'id'	 => $attachment_id,
+								'name'   => $attachment_title,
+								'url'    => $attachment_link,
+								'title'  => $attachment_caption,
+								'width'  => $attachment_width,
+								'height' => $attachment_height,
+							);
+						}
+						
+						?>
+						
+						<?php //if ( $gallery_images ) :
+							//$i = 0; ?>
+						
+							
+						<?php //endif; ?>
+					
+						<!-- Related Rooms -->
+
+						<?php
+						$post_ID = get_the_ID();
+						$custom_loop = new WP_Query(array(
+							'post_type'      => 'room',
+							'post__not_in' => array( $post_ID ),
+						));
+						?>
+						<?php if ($custom_loop->have_posts() && get_theme_mod('related_rooms', 'yes') != 'no') { ?>
+							<div class="row">
+								<div class="col-lg-12 col-md-12 col-sm-12 content_row">
+									<div>
+										<?php //echo do_shortcode('[cl_room_carousel img_height="510" img_width="420"]'); ?>
+																				
+									</div>
+								</div>
+							</div>
+						<?php } ?>
+                        <?php
+                            $map_lat = get_post_meta($post->ID, '_calluna_room_map_lat', true);
+                            $map_lng = get_post_meta($post->ID, '_calluna_room_map_lng', true);
+                        ?>
+                        <?php if (get_theme_mod('show_room_map', 'yes') != 'no' && $map_lat != '' && $map_lng != ''){ ?>
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 content_row">
+                                    <div>
+                                        <?php
+                                            $map_type = get_post_meta($post->ID, '_calluna_room_map_type', true);
+                                            $map_style = get_post_meta($post->ID, '_calluna_room_map_style', true);
+                                            $map_height = get_post_meta($post->ID, '_calluna_room_map_height', true);
+                                            $map_zoom = get_post_meta($post->ID, '_calluna_room_map_zoom', true);
+                                            $map_marker = get_post_meta($post->ID, '_calluna_room_map_marker', true);
+
+                                            $shortcode = '[cl_google_map';
+                                            $shortcode .= ' map_type="' . $map_type . '"';
+                                            $shortcode .= ' style="' . $map_style . '"';
+                                            $shortcode .= ' height="' . $map_height . '"';
+                                            $shortcode .= ' lat="' . $map_lat . '"';
+                                            $shortcode .= ' lng="' . $map_lng . '"';
+                                            $shortcode .= ' zoom="' . $map_zoom . '"';
+                                            $shortcode .= ' marker="' . $map_marker . '"';
+                                            $shortcode .= ']';
+                                            echo do_shortcode($shortcode);
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php } ?>
+						<?php if (get_post_meta($post->ID, '_calluna_room_custom_content', true)) { ?>
+							<div class="row">
+								<div class="col-lg-12 col-md-12 col-sm-12 content_row">
+									<div>
+										<?php echo wp_kses(get_post_meta($post->ID, '_calluna_room_custom_content', true),calluna_allowed_tags()); ?>
+									</div>
+								</div>
+															</div>
+						<?php } ?>
+
+					</div><!-- .entry-content -->
+
+				</div><!-- #post-## -->
+
+				<?php //do_action('apb_single_message'); ?>
+			<?php endwhile; endif; ?>
+		</main><!-- #main -->
+	</div><!-- #primary -->
+	
+	<?php
+
+get_post_gallery_images(); 
+?>
+
+<style>
+    * {
+        -webkit-box-sizing: border-box; /* Safari 3.0 - 5.0, Chrome 1 - 9, Android 2.1 - 3.x */
+        -moz-box-sizing: border-box; /* Firefox 1 - 28 */
+        box-sizing: border-box;
+    }
+
+    body, html {
+        height: 100%;
+    }
+
+    img {
+        vertical-align: middle;
+    }
+
+    .owl-carousel {
+        height: 100%;
+    }
+
+    .owl-carousel .owl-item, .owl-carousel .item {
+       /* height: 100vh;*/
+    }
+
+    .owl-carousel .owl-item img {
+        transform-style: initial;
+       /* height: 100%;*/
+        object-fit: cover;
+    }
+
+    .owl-thumb-item img {
+        width: 150px;
+        height: auto;
+    }
+
+    .owl-thumbs {
+         position: absolute;
+               width: 100%;
+        
+    }
+
+    .owl-thumb-item {
+        display: table-cell;
+        border: none;
+        background: none;
+        padding: 0;
+        opacity: .4;
+		padding-left: 9px;
+    }
+
+    .owl-thumb-item.active, .owl-carousel .owl-item .item img {
+        opacity: 1;
+    }
+
+    .label {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: #0a6cff;
+        color: white;
+        padding: 10px 20px;
+        z-index: 5;
+        text-align: center;
+    }
+</style>
+
+<script src="<?php echo get_stylesheet_directory_uri(); ?>/js/owl.js"></script>    
+<script src="<?php echo get_stylesheet_directory_uri(); ?>/js/OwlCarousel2Thumbs.js"></script>
+
+<script>
+    var owl = jQuery('.owl-carousel');
+    owl.owlCarousel({
+        loop: true,
+        items: 1,
+        thumbs: true,
+		autoplay:true,
+   	    autoplayTimeout:5000,
+        thumbImage: true,
+        thumbContainerClass: 'owl-thumbs',
+        thumbItemClass: 'owl-thumb-item'
+    });
+</script>
+<?php get_footer(); ?>
